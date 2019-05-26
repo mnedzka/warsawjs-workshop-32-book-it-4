@@ -11,31 +11,55 @@ import RatingChart from './RatingChart';
 import { ONLINE_URL, BEDS_TYPE } from '../../utils/const';
 
 const SelectHotel = props => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [bedsTypeFilter, setBedType] = useState({})
+
+
+  function setBedTypeFilter(value, checked) {
+    setBedType({
+      ...bedsTypeFilter,
+      [value]: checked
+    })
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const result = await axios(ONLINE_URL);
+      setIsLoading(false);
+      setData(result.data.list.slice(0, 20));
+    }
+    fetchData()
+  }, []);
+
+  const filtered = applyFilter(bedsTypeFilter, data)
+
   return (
     <Container>
       <SortBar sortField={'price'} setField={noop} />
       <Layout>
         <Layout.Sidebar>
           <ChartSwitcher isChartVisible={false} switchChartVisible={noop} />
-          <Filters count={{}} onChange={noop} />
+          <Filters count={{}} onChange={setBedTypeFilter} />
         </Layout.Sidebar>
-        <Layout.Feed isLoading={true}>
-          {false && <RatingChart data={[]} />}
-          {false ? (
+        <Layout.Feed isLoading={isLoading}>
+          {false && <RatingChart data={data} />}
+          {isLoading ? (
             <Loader active inline="centered" />
           ) : (
-            <HotelsList hotels={[]} selectHotel={noop} />
-          )}
+              <HotelsList hotels={filtered} selectHotel={noop} />
+            )}
         </Layout.Feed>
       </Layout>
     </Container>
   );
 };
 
-const noop = () => {};
+const noop = () => { };
 
 function countHotelsByBedType(data) {
-  return data.reduce(function(acc, v) {
+  return data.reduce(function (acc, v) {
     acc[v.room] = acc[v.room] ? acc[v.room] + 1 : 1;
     return acc;
   }, {});
