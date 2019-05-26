@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Header, Divider, Checkbox } from 'semantic-ui-react';
 import { BEDS_TYPE } from '../../utils/const';
 
@@ -20,4 +20,4 @@ const Filters = ({ count, onChange }) => (
   </>
 );
 
-export default Filters;
+export default memo(Filters);

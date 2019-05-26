@@ -11,17 +11,11 @@ import RatingChart from './RatingChart';
 import { ONLINE_URL, BEDS_TYPE } from '../../utils/const';
 
 const SelectHotel = props => {
+  const [sortField, setField] = useState('price');
+  const [bedsTypeFilter, setBedType] = useState({});
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [bedsTypeFilter, setBedType] = useState({})
-
-
-  function setBedTypeFilter(value, checked) {
-    setBedType({
-      ...bedsTypeFilter,
-      [value]: checked
-    })
-  }
+  const [isChartVisible, setChartVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,22 +27,34 @@ const SelectHotel = props => {
     fetchData()
   }, []);
 
-  const filtered = applyFilter(bedsTypeFilter, data)
+  const setBedTypeFilter = useCallback(
+    (value, checked) =>
+      setBedType({
+        ...bedsTypeFilter,
+        [value]: checked
+      }),
+      [bedsTypeFilter]
+  )
+
+  const hotelsInFilter = useMemo(() => countHotelsByBedType(data), [data])
+  const filteredHotels = useMemo(() => applyFilter(bedsTypeFilter, data), [bedsTypeFilter, data])
+  const sortedHotels = useMemo(() => applySort(filteredHotels, sortField), [filteredHotels, sortField])
+  const chartData = useMemo(() => prepareChartData(filteredHotels), [filteredHotels])
 
   return (
     <Container>
-      <SortBar sortField={'price'} setField={noop} />
+      <SortBar sortField={sortField} setField={setField} />
       <Layout>
         <Layout.Sidebar>
-          <ChartSwitcher isChartVisible={false} switchChartVisible={noop} />
-          <Filters count={{}} onChange={setBedTypeFilter} />
+          <ChartSwitcher isChartVisible={isChartVisible} switchChartVisible={setChartVisible} />
+          <Filters count={hotelsInFilter} onChange={setBedTypeFilter} />
         </Layout.Sidebar>
         <Layout.Feed isLoading={isLoading}>
-          {false && <RatingChart data={data} />}
+          {isChartVisible && <RatingChart data={chartData} />}
           {isLoading ? (
             <Loader active inline="centered" />
           ) : (
-              <HotelsList hotels={filtered} selectHotel={noop} />
+              <HotelsList hotels={sortedHotels} selectHotel={noop} />
             )}
         </Layout.Feed>
       </Layout>
