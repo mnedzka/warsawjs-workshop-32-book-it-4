@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, lazy } from 'react';
 import axios from 'axios';
 import { Grid, Loader, Container } from 'semantic-ui-react';
 
@@ -6,9 +6,11 @@ import Filters from './Filters';
 import SortBar from './SortBar';
 import HotelsList from './HotelsList';
 import ChartSwitcher from './ChartSwitcher';
-import RatingChart from './RatingChart';
-
 import { ONLINE_URL, BEDS_TYPE } from '../../utils/const';
+import lazyWithPreload from '../../utils/lazyWithPreload';
+
+const RatingChart = lazyWithPreload(() => import('./RatingChart'));
+
 
 const SelectHotel = props => {
   const [sortField, setField] = useState('price');
@@ -16,6 +18,7 @@ const SelectHotel = props => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isChartVisible, setChartVisible] = useState(false);
+  const selecthotel = () => { }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,6 +26,7 @@ const SelectHotel = props => {
       const result = await axios(ONLINE_URL);
       setIsLoading(false);
       setData(result.data.list.slice(0, 20));
+      RatingChart.preload();
     }
     fetchData()
   }, []);
@@ -33,7 +37,7 @@ const SelectHotel = props => {
         ...bedsTypeFilter,
         [value]: checked
       }),
-      [bedsTypeFilter]
+    [bedsTypeFilter]
   )
 
   const hotelsInFilter = useMemo(() => countHotelsByBedType(data), [data])
@@ -50,7 +54,10 @@ const SelectHotel = props => {
           <Filters count={hotelsInFilter} onChange={setBedTypeFilter} />
         </Layout.Sidebar>
         <Layout.Feed isLoading={isLoading}>
-          {isChartVisible && <RatingChart data={chartData} />}
+          {isChartVisible &&
+            <React.Suspense fallback={<Loader active inline="centered" />}>
+              <RatingChart data={chartData} />
+            </React.Suspense>}
           {isLoading ? (
             <Loader active inline="centered" />
           ) : (
