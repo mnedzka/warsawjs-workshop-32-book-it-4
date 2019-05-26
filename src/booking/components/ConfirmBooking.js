@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, Table, Divider, Container, Message } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 
 import HotelsList from './HotelsList';
+import { completeBooking, closeSummary } from '../reducers';
+import { getBookingError, isBookingInProgress, isBookingComplete, isBookingSuccess, isBookingFailure } from '../selectors';
 
 const ConfirmBooking = ({
   complete,
@@ -76,7 +78,7 @@ const ConfirmBooking = ({
           Zarezerwuj
         </Button>
       )}
-      <Button onClick={() => noop()} floated="left">
+      <Button onClick={() => complete()} floated="left">
         Powrót do listy hoteli
       </Button>
       <Divider hidden fitted clearing />
@@ -86,4 +88,17 @@ const ConfirmBooking = ({
 
 const noop = () => { };
 
-export default ConfirmBooking;
+const mapStateToProps = (state) => ({
+  error: getBookingError(state),
+  loading: isBookingInProgress(state),
+  isComplete: isBookingComplete(state),
+  isSuccess: isBookingSuccess(state),
+  isFailure: isBookingFailure(state),
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  complete: booking => dispatch(completeBooking(booking)),
+  close: dispatch(closeSummary()),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConfirmBooking);

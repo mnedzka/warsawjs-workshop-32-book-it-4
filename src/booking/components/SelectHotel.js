@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo, lazy } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Grid, Loader, Container } from 'semantic-ui-react';
 
@@ -10,7 +10,6 @@ import { ONLINE_URL, BEDS_TYPE } from '../../utils/const';
 import lazyWithPreload from '../../utils/lazyWithPreload';
 
 const RatingChart = lazyWithPreload(() => import('./RatingChart'));
-
 
 const SelectHotel = ({ selectHotel }) => {
   const [sortField, setField] = useState('price');
