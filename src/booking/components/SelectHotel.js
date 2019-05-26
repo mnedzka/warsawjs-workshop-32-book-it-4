@@ -12,13 +12,13 @@ import lazyWithPreload from '../../utils/lazyWithPreload';
 const RatingChart = lazyWithPreload(() => import('./RatingChart'));
 
 
-const SelectHotel = props => {
+const SelectHotel = ({ selectHotel }) => {
   const [sortField, setField] = useState('price');
   const [bedsTypeFilter, setBedType] = useState({});
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isChartVisible, setChartVisible] = useState(false);
-  const selecthotel = () => { }
+  // const selecthotel = () => { }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,7 +61,7 @@ const SelectHotel = props => {
           {isLoading ? (
             <Loader active inline="centered" />
           ) : (
-              <HotelsList hotels={sortedHotels} selectHotel={noop} />
+              <HotelsList hotels={sortedHotels} selectHotel={selectHotel} />
             )}
         </Layout.Feed>
       </Layout>
