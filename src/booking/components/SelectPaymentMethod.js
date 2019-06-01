@@ -7,9 +7,27 @@ import {
   Container,
 } from 'semantic-ui-react';
 import HotelsList from './HotelsList';
+import { useBookingFlow } from './BookingContext';
 
-const SelectPaymentMethod = ({ hotel, selectPaymentMethod }) => {
-  const [value, setValue] = useState('');
+import usePersistsValue from '../../utils/usePersistsValue';
+
+const SelectPaymentMethod = () => {
+  const {
+    state: { hotel },
+    reset,
+    selectPaymentMethod,
+  } = useBookingFlow();
+  const [preferred, setPreferred] = usePersistsValue('preferredMethod', null);
+  const [value, setValue] = useState(preferred);
+  const mounted = useRef();
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+    } else {
+      setPreferred(value);
+    }
+  }, [value, setPreferred]);
+
   return (
     <Container text>
       <HotelsList hotels={[hotel]} />
@@ -31,12 +49,10 @@ const SelectPaymentMethod = ({ hotel, selectPaymentMethod }) => {
       >
         Wybierz
       </Button>
-      <Button onClick={() => noop()}>Powrót do listy hoteli</Button>
+      <Button onClick={() => reset()}>Powrót do listy hoteli</Button>
     </Container>
   );
 };
-
-const noop = () => { };
 
 export const paymentsOptions = [
   {
